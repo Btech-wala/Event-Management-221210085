@@ -1,66 +1,112 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Input from "../../components/Common/Input";
-import Button from "../../components/Common/Button";
 
-const UserLogin = () => {
-  const [form, setForm] = useState({ userId: "", password: "" });
-  const navigate = useNavigate();
+const AddItem = () => {
+  const [item, setItem] = useState({
+    name: "",
+    category: "",
+    price: "",
+    status: "Available",
+  });
+
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setItem({ ...item, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
+  const handleAdd = (e) => {
     e.preventDefault();
-    console.log("User login", form);
-    navigate("/user/dashboard");
+    if (!item.name || !item.category || !item.price) {
+      setMessage("Please fill all fields!");
+      return;
+    }
+
+    const newItem = { ...item, id: Date.now() };
+    const storedItems = JSON.parse(localStorage.getItem("vendorItems")) || [];
+    const updated = [...storedItems, newItem];
+    localStorage.setItem("vendorItems", JSON.stringify(updated));
+
+    setMessage("✅ Item added successfully!");
+    setItem({ name: "", category: "", price: "", status: "Available" });
+
+    setTimeout(() => setMessage(""), 2000);
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div className="card p-4 shadow" style={{ width: "350px" }}>
-        <h3 className="text-center mb-3 text-primary">Event Management System</h3>
-        <h5 className="text-center">User Login</h5>
+    <div className="container mt-5">
+      <div className="card shadow p-4 mx-auto" style={{ maxWidth: "500px" }}>
+        <h4 className="text-center text-primary mb-3">Add New Item</h4>
 
-        <form onSubmit={handleLogin}>
-          <Input
-            label="User ID"
-            name="userId"
-            value={form.userId}
-            onChange={handleChange}
-          />
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-          />
-
-          <div className="text-center mt-3">
-            <Button text="Login" type="submit" />
-            <Button
-              text="Cancel"
-              variant="secondary"
-              onClick={() => setForm({ userId: "", password: "" })}
+        <form onSubmit={handleAdd}>
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Item Name</label>
+            <input
+              type="text"
+              className="form-control"
+              name="name"
+              value={item.name}
+              onChange={handleChange}
+              placeholder="Enter item name"
             />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Category</label>
+            <input
+              type="text"
+              className="form-control"
+              name="category"
+              value={item.category}
+              onChange={handleChange}
+              placeholder="Enter category"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Price (₹)</label>
+            <input
+              type="number"
+              className="form-control"
+              name="price"
+              value={item.price}
+              onChange={handleChange}
+              placeholder="Enter price"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Status</label>
+            <select
+              className="form-select"
+              name="status"
+              value={item.status}
+              onChange={handleChange}
+            >
+              <option>Available</option>
+              <option>Out of Stock</option>
+            </select>
+          </div>
+
+          <div className="text-center">
+            <button type="submit" className="btn btn-success me-2">
+              Add Item
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() =>
+                setItem({ name: "", category: "", price: "", status: "Available" })
+              }
+            >
+              Reset
+            </button>
           </div>
         </form>
 
-        <p className="mt-3 text-center">
-          Not registered?{" "}
-          <span
-            className="text-primary fw-bold"
-            style={{ cursor: "pointer" }}
-            onClick={() => navigate("/signup")}
-          >
-            Sign Up
-          </span>
-        </p>
+        {message && <p className="mt-3 text-center text-info">{message}</p>}
       </div>
     </div>
   );
 };
 
-export default UserLogin;
+export default AddItem;
